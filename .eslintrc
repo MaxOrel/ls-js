@@ -37,7 +37,7 @@
     ],
     "max-len": [
       "error",
-      120
+      240
     ],
     "newline-after-var": "error",
     "newline-before-return": "error",
