@@ -36,6 +36,7 @@ let homeworkContainer = document.querySelector('#homework-container');
  * @return {Promise<Array<{name: string}>>}
  */
 function loadTowns() {
+    return require('./index').loadAndSortTowns();
 }
 
 /**
@@ -52,6 +53,11 @@ function loadTowns() {
  * @return {boolean}
  */
 function isMatching(full, chunk) {
+    if (full.toLowerCase().indexOf(chunk.toLowerCase()) >= 0) {
+        return true;
+    }
+
+    return false;
 }
 
 let loadingBlock = homeworkContainer.querySelector('#loading-block');
