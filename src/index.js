@@ -7,7 +7,8 @@
  * @return {Promise}
  */
 function delayPromise(seconds) {
-    return new Promise(function(resolve){
+
+    return new Promise(function(resolve) {
         setTimeout(() => {
             resolve();
         }, seconds*1000);
@@ -23,6 +24,7 @@ function delayPromise(seconds) {
  */
 function loadAndSortTowns() {
     let compare = (a, b) => {
+        
         return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
     }
     

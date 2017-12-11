@@ -7,16 +7,16 @@
  *
  * При вводе в текстовое поле, под ним должен появляться список тех городов,
  * в названии которых, хотя бы частично, есть введенное значение.
- * Регистр символов учитываться не должен, то есть "Moscow" и "moscow" - одинаковые названия.
+ * Регистр символов учитываться не должен, то есть 'Moscow' и 'moscow' - одинаковые названия.
  *
- * Во время загрузки городов, на странице должна быть надпись "Загрузка..."
+ * Во время загрузки городов, на странице должна быть надпись 'Загрузка...'
  * После окончания загрузки городов, надпись исчезает и появляется текстовое поле.
  *
  * Запрещено использовать сторонние библиотеки. Разрешено пользоваться только тем, что встроено в браузер
  *
  * *** Часть со звездочкой ***
  * Если загрузка городов не удалась (например, отключился интернет или сервер вернул ошибку),
- * то необходимо показать надпись "Не удалось загрузить города" и кнопку "Повторить".
+ * то необходимо показать надпись 'Не удалось загрузить города' и кнопку 'Повторить'.
  * При клике на кнопку, процесс загруки повторяется заново
  */
 
@@ -36,7 +36,27 @@ let homeworkContainer = document.querySelector('#homework-container');
  * @return {Promise<Array<{name: string}>>}
  */
 function loadTowns() {
-    return require('./index').loadAndSortTowns();
+    let compare = (a, b) => {
+
+        return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+    };
+
+    return new Promise(function (resolve, reject) {
+        let xhr = new XMLHttpRequest();
+
+        xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json');
+        xhr.send();
+        xhr.addEventListener('load', function () {
+            if (xhr.status < 400) {
+                let response = JSON.parse(xhr.response);
+                
+                response.sort(compare);
+                resolve(response);
+            } else {
+                reject();
+            }
+        });
+    });
 }
 
 /**
@@ -64,9 +84,44 @@ let loadingBlock = homeworkContainer.querySelector('#loading-block');
 let filterBlock = homeworkContainer.querySelector('#filter-block');
 let filterInput = homeworkContainer.querySelector('#filter-input');
 let filterResult = homeworkContainer.querySelector('#filter-result');
-let townsPromise;
+let townsPromise = loadTowns();
+var resultArr = [];
 
-filterInput.addEventListener('keyup', function() {
+let success = (cities) => {
+    loadingBlock.style.display = 'none';
+    filterBlock.style.display = 'block';
+    resultArr = cities;
+};
+
+let error = () => {
+    let button = document.createElement('button');
+    
+    button.innerHTML = 'Повторить';
+    loadingBlock.innerHTML = 'Не удалось загрузить города';
+    loadingBlock.appendChild(button);
+    button.addEventListener('click', () => {
+        loadingBlock.innerHTML = 'Загрузка...';
+        townsPromise.then(success, error);
+    });
+};
+
+townsPromise.then(success, error);
+
+filterInput.addEventListener('keyup', function (e) {
+    let value = e.target.value;
+
+    filterResult.innerHTML = '';
+    resultArr.forEach((item) => {
+        if (isMatching(item.name, value)) {
+            let newDiv = document.createElement('div');
+
+            newDiv.innerHTML = item.name;
+            filterResult.appendChild(newDiv);
+        }
+        if (value === '') {
+            filterResult.innerHTML = '';
+        }
+    });
 });
 
 export {
