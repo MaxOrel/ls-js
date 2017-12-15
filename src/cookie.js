@@ -39,8 +39,77 @@ let addValueInput = homeworkContainer.querySelector('#add-value-input');
 let addButton = homeworkContainer.querySelector('#add-button');
 let listTable = homeworkContainer.querySelector('#list-table tbody');
 
-filterNameInput.addEventListener('keyup', function() {
+/**
+ * Функция которая создает объект существующих cookie
+ */
+function getCookies() {
+    return document.cookie
+        .split("; ")
+        .filter(Boolean)
+        .map(cookie => cookie.match(/^([^=]+)=(.+)/))
+        .reduce((obj, [, name, value]) => {
+            obj[name] = value;
+
+            return obj;
+        }, {});
+}
+
+/**
+ * Функция добавляет куки в таблицу, в зависимости содержимого текстового поля
+ */
+function filterCookiesAll() {
+    let cookies = getCookies();
+
+    listTable.innerHTML = '';
+
+    for (let name in cookies) {
+        if (
+            name.includes(filterNameInput.value) ||
+            cookies[name].includes(filterNameInput.value)
+        ) {
+            addCookie(name, cookies[name]);
+        }
+    }
+}
+/**
+ * Функция создает строку таблицы и добавляет Cookie
+ */
+function addCookie(name, value) {
+    // создаем и заполняем таблицу
+    let tr = document.createElement('tr'),
+        deleteButton = document.createElement('button');
+
+    deleteButton.innerHTML = 'Удалить';
+    deleteButton.className = 'delete';
+    tr.innerHTML = `<td>${name}</td><td>${value}</td>`;
+    tr.appendChild(deleteButton);
+
+    deleteButton.addEventListener('click', () => {
+        let tr = deleteButton.closest('tr');
+
+        listTable.removeChild(tr);
+        document.cookie = `${name}=;expires=${new Date(0)}`;
+    });
+
+    listTable.appendChild(tr);
+}
+
+filterNameInput.addEventListener('keyup', function () {
+    filterCookiesAll();
 });
 
 addButton.addEventListener('click', () => {
+    let name = addNameInput.value,
+        value = addValueInput.value;
+
+    if (value === '' || name === '') {
+        alert('Вы не ввели данные в форму, куки не добавлены');
+
+        return;
+    }
+    document.cookie = `${name}=${value}`;
+    alert('cookie успешно добавлены');
+    filterCookiesAll();
 });
+
+filterCookiesAll();
